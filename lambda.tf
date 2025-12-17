@@ -7,7 +7,7 @@ data "archive_file" "lambda_handler" {
 
 # define iam lambda role
 resource "aws_iam_role" "dkr" {
-  name               = format("%s-lbda-%s", var.prefix, random_string.suffix)
+  name               = format("%s-lbda-%s", var.prefix, random_string.suffix.result)
   description        = "Allow ECS & Lambda images"
   assume_role_policy = data.aws_iam_policy_document.lambda.json
   tags               = var.tags
@@ -25,7 +25,7 @@ resource "aws_iam_role_policy" "dkr_monitoring" {
 
 # define lambda function
 resource "aws_lambda_function" "dkr" {
-  function_name                  = format("%s-%s", var.prefix, random_string.suffix)
+  function_name                  = format("%s-%s", var.prefix, random_string.suffix.result)
   filename                       = data.archive_file.lambda_handler.output_path
   source_code_hash               = filebase64sha256(data.archive_file.lambda_handler.output_path)
   role                           = aws_iam_role.dkr.arn

@@ -2,11 +2,12 @@
 
 
 This is a Terraform module to build an AWS EventBridge rule
-which trap ECR image pushed with **specific tag** and
-trigger updates to Lambda functions and ECS tasks
-
+which traps ECR image pushed with **specific tag** and
+trigger updates to Lambda functions and ECS tasks  
 A common AWS SQS dead letter queue collect
 unprocessed *Event* and *Lambda* invocations
+
+> *Warning: don't forget to set up ECR repository policies to allow AWS ECS & Lambda services to pull images*
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -15,7 +16,7 @@ unprocessed *Event* and *Lambda* invocations
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.6.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.83.1 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.21.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6.2 |
 
 ## Providers
@@ -56,13 +57,13 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_concurrents"></a> [concurrents](#input\_concurrents) | Reserved concurrent Lambda executions | `number` | `4` | no |
-| <a name="input_event_state"></a> [event\_state](#input\_event\_state) | EventBridge rule's state. It can be 'ENABLED' or 'DISABLED' | `string` | `"ENABLED"` | no |
+| <a name="input_event_state"></a> [event\_state](#input\_event\_state) | EventBridge rule's state. Valid values are ('ENABLED', 'DISABLED') | `string` | `"ENABLED"` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Docker image's tag (e.g. latest, dev, qa, prd, ...) | `string` | `"latest"` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for AWS resources | `string` | `"dkr-update"` | no |
 | <a name="input_retention"></a> [retention](#input\_retention) | Lambda logs retention in days | `number` | `30` | no |
 | <a name="input_runtime"></a> [runtime](#input\_runtime) | Lambda runtime version | `string` | `"python3.14"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be applied to the module's resources | `map(string)` | n/a | yes |
-| <a name="input_update_lambda"></a> [update\_lambda](#input\_update\_lambda) | When set to 'on' Lambda's image will be automatically updated | `string` | `"off"` | no |
+| <a name="input_update_lambda"></a> [update\_lambda](#input\_update\_lambda) | Updates Lambda's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
 
 ## Outputs
 

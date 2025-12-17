@@ -7,13 +7,17 @@ variable "image_tag" {
 variable "update_lambda" {
   type        = string
   default     = "off"
-  description = "When set to 'on' Lambda's image will be automatically updated"
+  description = "Updates Lambda's image automatically. Valid values are ('on', 'off')"
+  validation {
+    condition     = contains(["on", "off"], var.update_lambda)
+    error_message = "Valid values for var: update_lambda are ('on', 'off')"
+  }
 }
 
 variable "event_state" {
   type        = string
   default     = "ENABLED"
-  description = "EventBridge rule's state. It can be 'ENABLED' or 'DISABLED'"
+  description = "EventBridge rule's state. Valid values are ('ENABLED', 'DISABLED')"
   validation {
     condition     = contains(["ENABLED", "DISABLED"], var.event_state)
     error_message = "Valid values for var: event_state are ('ENABLED', 'DISABLED')"

@@ -6,7 +6,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = ">= 5.83.1"
+      version = ">= 6.21.0"
     }
     archive = {
       source  = "hashicorp/archive"
