@@ -41,8 +41,9 @@ data "aws_iam_policy_document" "monitoring" {
     ]
     resources = [
       format(
-        "arn:aws:logs:*:*:log-group:/aws/lambda/%s:log-stream:*",
-        aws_lambda_function.dkr.function_name
+        "arn:aws:logs:*:*:log-group:/aws/lambda/%s-%s:log-stream:*",
+        var.prefix,
+        random_string.suffix.result
       )
     ]
   }
