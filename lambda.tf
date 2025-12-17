@@ -27,7 +27,7 @@ resource "aws_iam_role_policy" "dkr_monitoring" {
 resource "aws_lambda_function" "dkr" {
   function_name                  = format("%s-%s", var.prefix, random_string.suffix.result)
   filename                       = data.archive_file.lambda_handler.output_path
-  source_code_hash               = filebase64sha256(data.archive_file.lambda_handler.output_path)
+  source_code_hash               = data.archive_file.lambda_handler.output_base64sha256
   role                           = aws_iam_role.dkr.arn
   handler                        = "dkr.handler"
   description                    = "Updates Lambda functions images from ECR tags"

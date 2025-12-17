@@ -28,12 +28,12 @@ resource "aws_cloudwatch_event_rule" "dkr" {
   state       = var.event_state
   tags        = var.tags
   event_pattern = jsonencode({
-    source      = ("aws.ecr")
-    detail-type = ("ECR Image Action")
+    source      = ["aws.ecr"]
+    detail-type = ["ECR Image Action"]
     detail = {
-      image-tag   = (var.image_tag)
-      action-type = ("PUSH")
-      result      = ("SUCCESS")
+      image-tag   = [var.image_tag]
+      action-type = ["PUSH"]
+      result      = ["SUCCESS"]
     }
   })
 }

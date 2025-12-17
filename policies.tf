@@ -27,6 +27,12 @@ data "aws_iam_policy_document" "running" {
 # policy for lambda monitoring privileges
 data "aws_iam_policy_document" "monitoring" {
   statement {
+    sid       = "DLQ"
+    effect    = "Allow"
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.dlq.arn]
+  }
+  statement {
     sid    = "Logging"
     effect = "Allow"
     actions = [
