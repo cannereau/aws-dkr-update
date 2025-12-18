@@ -13,12 +13,19 @@ data "aws_iam_policy_document" "lambda" {
 # policy for lambda running privileges
 data "aws_iam_policy_document" "running" {
   statement {
-    sid    = "LambdaOperations"
+    sid    = "LambdaList"
     effect = "Allow"
     actions = [
-      "lambda:ListFunctions",
+      "lambda:ListFunctions"
+    ]
+    resources = ["*"]
+  }
+  statement {
+    sid    = "LambdaUpdate"
+    effect = "Allow"
+    actions = [
       "lambda:GetFunction",
-      "lambda:UpdateFunctionCode",
+      "lambda:UpdateFunctionCode"
     ]
     resources = ["arn:aws:lambda:*:*:function:*"]
   }
