@@ -43,6 +43,7 @@ resource "aws_lambda_function" "dkr" {
   environment {
     variables = {
       IMAGE_TAG     = var.image_tag
+      UPDATE_ECS    = var.update_ecs
       UPDATE_LAMBDA = var.update_lambda
     }
   }

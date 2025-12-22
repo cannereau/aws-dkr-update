@@ -3,8 +3,8 @@
 
 This is a Terraform module to build an AWS EventBridge rule
 which traps ECR image pushed with **specific tag** and
-trigger updates to Lambda functions and ECS tasks  
-A common AWS SQS dead letter queue collect
+trigger updates to Lambda functions and ECS services  
+A common AWS SQS dead letter queue collects
 unprocessed *Event* and *Lambda* invocations
 
 > *Warning: don't forget to set up ECR repository policies to allow AWS ECS & Lambda services to pull images*
@@ -63,6 +63,7 @@ No modules.
 | <a name="input_retention"></a> [retention](#input\_retention) | Lambda logs retention in days | `number` | `30` | no |
 | <a name="input_runtime"></a> [runtime](#input\_runtime) | Lambda runtime version | `string` | `"python3.14"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be applied to the module's resources | `map(string)` | n/a | yes |
+| <a name="input_update_ecs"></a> [update\_ecs](#input\_update\_ecs) | Updates ECS Task Definition's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
 | <a name="input_update_lambda"></a> [update\_lambda](#input\_update\_lambda) | Updates Lambda's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
 
 ## Outputs

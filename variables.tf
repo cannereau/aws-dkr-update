@@ -4,6 +4,16 @@ variable "image_tag" {
   description = "Docker image's tag (e.g. latest, dev, qa, prd, ...)"
 }
 
+variable "update_ecs" {
+  type        = string
+  default     = "off"
+  description = "Updates ECS Task Definition's image automatically. Valid values are ('on', 'off')"
+  validation {
+    condition     = contains(["on", "off"], var.update_ecs)
+    error_message = "Valid values for var: update_ecs are ('on', 'off')"
+  }
+}
+
 variable "update_lambda" {
   type        = string
   default     = "off"

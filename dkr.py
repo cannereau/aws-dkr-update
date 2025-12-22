@@ -10,11 +10,15 @@ logging.getLogger().setLevel(logging.INFO)
 ENV_TAG = "dev"
 if "IMAGE_TAG" in os.environ:
     ENV_TAG = os.environ["IMAGE_TAG"]
+UPDATE_ECS = "off"
+if "UPDATE_ECS" in os.environ:
+    UPDATE_ECS = os.environ["UPDATE_ECS"]
 UPDATE_LAMBDA = "off"
 if "UPDATE_LAMBDA" in os.environ:
     UPDATE_LAMBDA = os.environ["UPDATE_LAMBDA"]
 
 # init boto3 clients
+ECS = boto3.client("ecs")
 LDA = boto3.client("lambda")
 
 
@@ -50,6 +54,25 @@ def handler(event, context):
                                 event["detail"]["image-digest"],
                             )
 
+            # browse task definitions
+            if UPDATE_ECS == "on":
+                tds = []
+                tag_image = f"{event['detail']['repository-name']}:{ENV_TAG}"
+                paginator = ECS.get_paginator("list_task_definitions")
+                iterator = paginator.paginate(status="ACTIVE")
+                for page in iterator:
+                    logging.info("Browsing ecs task definitions...")
+                    for arn in page["taskDefinitionArns"]:
+                        td = ECS.describe_task_definition(taskDefinition=arn)
+                        for cd in td["containerDefinitions"]:
+                            if arn not in tds:
+                                logging.info(f"...IMAGE_URI:{cd['image']}")
+                                match = re.search(r"^[^/]*/([^:]*:[^:]*)$", cd["image"])
+                                if match is not None and match.group(1) == tag_image:
+                                    logging.info(f"...FAMILY:{td['family']}")
+                                    tds.append(td["family"])
+                process_task_definitions(tds)
+
         else:
             logging.info("Invalid Image Tag")
 
@@ -80,3 +103,26 @@ def process_function(arn, repo, digest):
             target_uri = re.sub(r"@(.*)$", f"@{digest}", f["Code"]["ImageUri"])
             logging.info(f"...Updating image to {target_uri}...")
             LDA.update_function_code(FunctionName=arn, ImageUri=target_uri)
+
+
+def process_task_definitions(families):
+    # browse ecs clusters
+    paginator = ECS.get_paginator("list_clusters")
+    iterator = paginator.paginate()
+    for page in iterator:
+        logging.info("Browsing ecs task clusters...")
+        for c in page["clusterArns"]:
+            # browse services
+            paginator_s = ECS.get_paginator("list_services")
+            iterator_s = paginator_s.paginate()
+            for page_s in iterator_s:
+                logging.info("Browsing services...")
+                for s in page_s["serviceArns"]:
+                    # check task definition
+                    srv = ECS.describe_services(services=[s])
+                    logging.info(f"...TASK_DEF:{srv['services'][0]['taskDefinition']}")
+                    if srv["services"][0]["taskDefinition"] in families:
+                        # rolling update
+                        logging.info(
+                            f"...Updating service {srv['services'][0]['serviceName']}"
+                        )
