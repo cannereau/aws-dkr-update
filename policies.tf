@@ -29,6 +29,19 @@ data "aws_iam_policy_document" "running" {
     ]
     resources = ["arn:aws:lambda:*:*:function:*"]
   }
+  statement {
+    sid    = "ECS"
+    effect = "Allow"
+    actions = [
+      "ecs:ListClusters",
+      "ecs:ListServices",
+      "ecs:ListTaskDefinitions",
+      "ecs:DescribeTaskDefinition",
+      "ecs:DescribeServices",
+      "ecs:UpdateService"
+    ]
+    resources = ["arn:aws:lambda:*:*:function:*"]
+  }
 }
 
 # policy for lambda monitoring privileges

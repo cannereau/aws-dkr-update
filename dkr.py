@@ -114,15 +114,21 @@ def process_task_definitions(families):
         for c in page["clusterArns"]:
             # browse services
             paginator_s = ECS.get_paginator("list_services")
-            iterator_s = paginator_s.paginate()
+            iterator_s = paginator_s.paginate(cluster=c)
             for page_s in iterator_s:
                 logging.info("Browsing services...")
                 for s in page_s["serviceArns"]:
                     # check task definition
-                    srv = ECS.describe_services(services=[s])
+                    srv = ECS.describe_services(cluster=c, services=[s])
                     logging.info(f"...TASK_DEF:{srv['services'][0]['taskDefinition']}")
                     if srv["services"][0]["taskDefinition"] in families:
                         # rolling update
                         logging.info(
                             f"...Updating service {srv['services'][0]['serviceName']}"
                         )
+                        response = ECS.update_service(
+                            cluster=c,
+                            service=srv["services"][0]["serviceName"],
+                            taskDefinition=srv["services"][0]["taskDefinition"],
+                        )
+                        logging.info(response)
