@@ -54,7 +54,7 @@ def handler(event, context):
                                 event["detail"]["image-digest"],
                             )
 
-            # browse task definitions
+            # browse ecs task definitions
             if UPDATE_ECS == "on":
                 tds = []
                 tag_image = f"{event['detail']['repository-name']}:{ENV_TAG}"
@@ -64,14 +64,14 @@ def handler(event, context):
                     logging.info("Browsing ecs task definitions...")
                     for arn in page["taskDefinitionArns"]:
                         td = ECS.describe_task_definition(taskDefinition=arn)
-                        for cd in td["containerDefinitions"]:
-                            if arn not in tds:
-                                logging.info(f"...IMAGE_URI:{cd['image']}")
-                                match = re.search(r"^[^/]*/([^:]*:[^:]*)$", cd["image"])
-                                if match is not None and match.group(1) == tag_image:
-                                    logging.info(f"...FAMILY:{td['family']}")
-                                    tds.append(td["family"])
-                process_task_definitions(tds)
+                        for cd in td["taskDefinition"]["containerDefinitions"]:
+                            logging.info(f"...IMAGE_URI:{cd['image']}")
+                            match = re.search(r"^[^/]*/([^:]*:[^:]*)$", cd["image"])
+                            if match is not None and match.group(1) == tag_image:
+                                logging.info(f"...TASK_ARN:{arn}")
+                                tds.append(arn)
+                if len(tds) > 0:
+                    process_task_definitions(tds)
 
         else:
             logging.info("Invalid Image Tag")
@@ -105,7 +105,7 @@ def process_function(arn, repo, digest):
             LDA.update_function_code(FunctionName=arn, ImageUri=target_uri)
 
 
-def process_task_definitions(families):
+def process_task_definitions(arns):
     # browse ecs clusters
     paginator = ECS.get_paginator("list_clusters")
     iterator = paginator.paginate()
@@ -121,14 +121,23 @@ def process_task_definitions(families):
                     # check task definition
                     srv = ECS.describe_services(cluster=c, services=[s])
                     logging.info(f"...TASK_DEF:{srv['services'][0]['taskDefinition']}")
-                    if srv["services"][0]["taskDefinition"] in families:
+                    if srv["services"][0]["taskDefinition"] in arns:
                         # rolling update
                         logging.info(
                             f"...Updating service {srv['services'][0]['serviceName']}"
                         )
-                        response = ECS.update_service(
+                        upd = ECS.update_service(
                             cluster=c,
                             service=srv["services"][0]["serviceName"],
                             taskDefinition=srv["services"][0]["taskDefinition"],
+                            forceNewDeployment=True,
                         )
-                        logging.info(response)
+                        if "deployments" in upd:
+                            for dep in upd["deployments"]:
+                                if (
+                                    "rolloutState" in dep
+                                    and dep["rolloutState"] == "IN_PROGRESS"
+                                ):
+                                    logging.info(f"...DEPLOYMENT:{dep['id']}")
+                        else:
+                            logging.info("Unable to find deployment!")

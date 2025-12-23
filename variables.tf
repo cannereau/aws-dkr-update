@@ -34,10 +34,16 @@ variable "event_state" {
   }
 }
 
-variable "prefix" {
+variable "prefix_module" {
   type        = string
   default     = "dkr-update"
-  description = "Prefix for AWS resources"
+  description = "Prefix for naming AWS resources of this module"
+}
+
+variable "prefix_ecs" {
+  type        = string
+  default     = "ecs-"
+  description = "Prefix of IAM roles that will be passed for ECS update"
 }
 
 variable "retention" {

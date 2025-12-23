@@ -9,7 +9,7 @@ resource "random_string" "suffix" {
 
 # sqs for dead letter queue
 resource "aws_sqs_queue" "dlq" {
-  name                      = format("%s-%s", var.prefix, random_string.suffix.result)
+  name                      = format("%s-%s", var.prefix_module, random_string.suffix.result)
   sqs_managed_sse_enabled   = true
   message_retention_seconds = 1209600 # maximum value allowed by SQS
   tags                      = var.tags
@@ -23,7 +23,7 @@ resource "aws_sqs_queue_policy" "dlq" {
 
 # event rule
 resource "aws_cloudwatch_event_rule" "dkr" {
-  name        = format("%s-%s", var.prefix, random_string.suffix.result)
+  name        = format("%s-%s", var.prefix_module, random_string.suffix.result)
   description = "Catch ECR image update"
   state       = var.event_state
   tags        = var.tags
@@ -40,7 +40,7 @@ resource "aws_cloudwatch_event_rule" "dkr" {
 
 # event target
 resource "aws_cloudwatch_event_target" "dkr" {
-  target_id = format("%s-tgt-%s", var.prefix, random_string.suffix.result)
+  target_id = format("%s-tgt-%s", var.prefix_module, random_string.suffix.result)
   rule      = aws_cloudwatch_event_rule.dkr.name
   arn       = aws_lambda_function.dkr.arn
   dead_letter_config {

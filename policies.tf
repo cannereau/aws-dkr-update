@@ -12,8 +12,9 @@ data "aws_iam_policy_document" "lambda" {
 
 # policy for lambda running privileges
 data "aws_iam_policy_document" "running" {
+  #checkov:skip=CKV_AWS_356: Ensure no IAM policies documents allow "*" as a statement's resource for restrictable actions
   statement {
-    sid    = "LambdaList"
+    sid    = "LambdaRead"
     effect = "Allow"
     actions = [
       "lambda:ListFunctions"
@@ -30,17 +31,47 @@ data "aws_iam_policy_document" "running" {
     resources = ["arn:aws:lambda:*:*:function:*"]
   }
   statement {
-    sid    = "ECS"
+    sid    = "ECSRead"
     effect = "Allow"
     actions = [
       "ecs:ListClusters",
       "ecs:ListServices",
       "ecs:ListTaskDefinitions",
       "ecs:DescribeTaskDefinition",
-      "ecs:DescribeServices",
+      "ecs:DescribeServices"
+    ]
+    resources = ["*"]
+  }
+  statement {
+    sid    = "ECSUpdate"
+    effect = "Allow"
+    actions = [
       "ecs:UpdateService"
     ]
-    resources = ["arn:aws:lambda:*:*:function:*"]
+    resources = ["arn:aws:ecs:*:*:service/*"]
+  }
+  statement {
+    sid    = "ECSPassRole"
+    effect = "Allow"
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = [
+      format("arn:aws:iam::*:role/%s*", var.prefix_ecs)
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["ecs-tasks.amazonaws.com"]
+    }
+
+    condition {
+      test     = "ArnLike"
+      variable = "iam:AssociatedResourceARN"
+      values   = ["arn:aws:ecs:*:*:task-definition/*"]
+    }
+
   }
 }
 
@@ -62,7 +93,7 @@ data "aws_iam_policy_document" "monitoring" {
     resources = [
       format(
         "arn:aws:logs:*:*:log-group:/aws/lambda/%s-%s:log-stream:*",
-        var.prefix,
+        var.prefix_module,
         random_string.suffix.result
       )
     ]

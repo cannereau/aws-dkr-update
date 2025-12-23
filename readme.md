@@ -59,7 +59,8 @@ No modules.
 | <a name="input_concurrents"></a> [concurrents](#input\_concurrents) | Reserved concurrent Lambda executions | `number` | `4` | no |
 | <a name="input_event_state"></a> [event\_state](#input\_event\_state) | EventBridge rule's state. Valid values are ('ENABLED', 'DISABLED') | `string` | `"ENABLED"` | no |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Docker image's tag (e.g. latest, dev, qa, prd, ...) | `string` | `"latest"` | no |
-| <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for AWS resources | `string` | `"dkr-update"` | no |
+| <a name="input_prefix_ecs"></a> [prefix\_ecs](#input\_prefix\_ecs) | Prefix of IAM roles that will be passed for ECS update | `string` | `"ecs-"` | no |
+| <a name="input_prefix_module"></a> [prefix\_module](#input\_prefix\_module) | Prefix for naming AWS resources of this module | `string` | `"dkr-update"` | no |
 | <a name="input_retention"></a> [retention](#input\_retention) | Lambda logs retention in days | `number` | `30` | no |
 | <a name="input_runtime"></a> [runtime](#input\_runtime) | Lambda runtime version | `string` | `"python3.14"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be applied to the module's resources | `map(string)` | n/a | yes |
