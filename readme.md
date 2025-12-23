@@ -12,6 +12,7 @@ unprocessed *Event* and *Lambda* invocations
 > *Warning: don't forget to set up ECR repository policies to allow AWS Lambda Service to pull images*
 
 <!-- BEGIN_TF_DOCS -->
+
 ## Requirements
 
 | Name | Version |
@@ -20,6 +21,7 @@ unprocessed *Event* and *Lambda* invocations
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.6.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.21.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6.2 |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -34,12 +36,14 @@ unprocessed *Event* and *Lambda* invocations
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be applied to the module's resources | `map(string)` | n/a | yes |
 | <a name="input_update_ecs"></a> [update\_ecs](#input\_update\_ecs) | Updates ECS Task Definition's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
 | <a name="input_update_lambda"></a> [update\_lambda](#input\_update\_lambda) | Updates Lambda's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
+
 ## Outputs
 
 | Name | Description |
 |------|-------------|
 | <a name="output_event_rule"></a> [event\_rule](#output\_event\_rule) | EventBridge rule's ARN |
 | <a name="output_lambda_function"></a> [lambda\_function](#output\_lambda\_function) | Lambda function's ARN |
+
 ## Resources
 
 | Name | Type |
