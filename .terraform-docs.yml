@@ -1,9 +1,13 @@
 formatter: "markdown table"
 
 content: |-
+
   {{ .Requirements }}
+
   {{ .Inputs }}
+
   {{ .Outputs }}
+
   {{ .Resources }}
 
 output:
