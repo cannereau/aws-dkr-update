@@ -7,7 +7,9 @@ trigger updates to Lambda functions and ECS services
 A common AWS SQS dead letter queue collects
 unprocessed *Event* and *Lambda* invocations
 
-> *Warning: don't forget to set up ECR repository policies to allow AWS ECS & Lambda services to pull images*
+> To limit the *iam:PassRole* effect, set the variable **prefix_ecs** accordingly. This prefix has to be used for ECS task execution roles
+
+> *Warning: don't forget to set up ECR repository policies to allow AWS Lambda Service to pull images*
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
