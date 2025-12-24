@@ -46,6 +46,7 @@ data "aws_iam_policy_document" "running" {
     sid    = "ECSUpdate"
     effect = "Allow"
     actions = [
+      "ecs:DeregisterTaskDefinition",
       "ecs:RegisterTaskDefinition",
       "ecs:UpdateService"
     ]

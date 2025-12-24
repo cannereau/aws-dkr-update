@@ -134,6 +134,8 @@ def process_task_definition(arn, repo, digest):
         logging.info("...Registering new revision")
         ntd = clean_task_definition(td["taskDefinition"], cds)
         ECS.register_task_definition(**ntd)
+        logging.info("...Deregestering old revision")
+        ECS.deregister_task_definition(taskDefinition=arn)
         return True
     else:
         return False
