@@ -46,9 +46,13 @@ data "aws_iam_policy_document" "running" {
     sid    = "ECSUpdate"
     effect = "Allow"
     actions = [
+      "ecs:RegisterTaskDefinition",
       "ecs:UpdateService"
     ]
-    resources = ["arn:aws:ecs:*:*:service/*"]
+    resources = [
+      "arn:aws:ecs:*:*:task-definition/*",
+      "arn:aws:ecs:*:*:service/*"
+    ]
   }
   statement {
     sid    = "ECSPassRole"

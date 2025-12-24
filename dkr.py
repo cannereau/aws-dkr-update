@@ -132,26 +132,8 @@ def process_task_definition(arn, repo, digest):
     # eventually register new task definition revision
     if changed:
         logging.info("...Registering new revision")
-        ECS.register_task_definition(
-            family=td["taskDefinition"]["family"],
-            taskRoleArn=td["taskDefinition"]["taskRoleArn"],
-            executionRoleArn=td["taskDefinition"]["executionRoleArn"],
-            networkMode=td["taskDefinition"]["networkMode"],
-            containerDefinitions=cds,
-            volumes=td["taskDefinition"]["volumes"],
-            placementConstraints=td["taskDefinition"]["placementConstraints"],
-            requiresCompatibilities=td["taskDefinition"]["requiresCompatibilities"],
-            cpu=td["taskDefinition"]["cpu"],
-            memory=td["taskDefinition"]["memory"],
-            tags=td["taskDefinition"]["tags"],
-            pidMode=td["taskDefinition"]["pidMode"],
-            ipcMode=td["taskDefinition"]["ipcMode"],
-            proxyConfiguration=td["taskDefinition"]["proxyConfiguration"],
-            inferenceAccelerators=td["taskDefinition"]["inferenceAccelerators"],
-            ephemeralStorage=td["taskDefinition"]["ephemeralStorage"],
-            runtimePlatform=td["taskDefinition"]["runtimePlatform"],
-            enableFaultInjection=td["taskDefinition"]["enableFaultInjection"],
-        )
+        ntd = clean_task_definition(td["taskDefinition"], cds)
+        ECS.register_task_definition(**ntd)
         return True
     else:
         return False
@@ -192,3 +174,23 @@ def update_services(arns):
                                     logging.info(f"...DEPLOYMENT:{dep['id']}")
                         else:
                             logging.info("Unable to find deployment!")
+
+
+def clean_task_definition(td, cds):
+    if "taskDefinitionArn" in td:
+        del td["taskDefinitionArn"]
+    if "revision" in td:
+        del td["revision"]
+    if "status" in td:
+        del td["status"]
+    if "requiresAttributes" in td:
+        del td["requiresAttributes"]
+    if "compatibilities" in td:
+        del td["compatibilities"]
+    if "registeredAt" in td:
+        del td["registeredAt"]
+    if "registeredBy" in td:
+        del td["registeredBy"]
+    if "containerDefinitions" in td:
+        td["containerDefinitions"] = cds
+    return td
