@@ -7,7 +7,7 @@ trigger updates to Lambda functions and ECS services
 A common AWS SQS dead letter queue collects
 unprocessed *Event* and *Lambda* invocations
 
-> To limit the *iam:PassRole* effect, set the variable **prefix_ecs** accordingly. This prefix has to be used for ECS task execution roles
+> To limit the *iam:PassRole* effect, set the variable **prefix_ecs** accordingly. This prefix has to be used for [ECS task execution roles](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html)
 
 > *Warning: don't forget to set up ECR repository policies to allow AWS Lambda Service to pull images*
 
@@ -17,32 +17,32 @@ unprocessed *Event* and *Lambda* invocations
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
-| <a name="requirement_archive"></a> [archive](#requirement\_archive) | >= 2.6.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.21.0 |
-| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6.2 |
+| terraform | >= 1.0.0 |
+| archive | >= 2.6.0 |
+| aws | >= 6.21.0 |
+| random | >= 3.6.2 |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_concurrents"></a> [concurrents](#input\_concurrents) | Reserved concurrent Lambda executions | `number` | `4` | no |
-| <a name="input_event_state"></a> [event\_state](#input\_event\_state) | EventBridge rule's state. Valid values are ('ENABLED', 'DISABLED') | `string` | `"ENABLED"` | no |
-| <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Docker image's tag (e.g. latest, dev, qa, prd, ...) | `string` | `"latest"` | no |
-| <a name="input_prefix_ecs"></a> [prefix\_ecs](#input\_prefix\_ecs) | Prefix of IAM roles that will be passed for ECS update | `string` | `"ecs-"` | no |
-| <a name="input_prefix_module"></a> [prefix\_module](#input\_prefix\_module) | Prefix for naming AWS resources of this module | `string` | `"dkr-update"` | no |
-| <a name="input_retention"></a> [retention](#input\_retention) | Lambda logs retention in days | `number` | `30` | no |
-| <a name="input_runtime"></a> [runtime](#input\_runtime) | Lambda runtime version | `string` | `"python3.14"` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be applied to the module's resources | `map(string)` | n/a | yes |
-| <a name="input_update_ecs"></a> [update\_ecs](#input\_update\_ecs) | Updates ECS Task Definition's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
-| <a name="input_update_lambda"></a> [update\_lambda](#input\_update\_lambda) | Updates Lambda's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
+| concurrents | Reserved concurrent Lambda executions | `number` | `4` | no |
+| event\_state | EventBridge rule's state. Valid values are ('ENABLED', 'DISABLED') | `string` | `"ENABLED"` | no |
+| image\_tag | Docker image's tag (e.g. latest, dev, qa, prd, ...) | `string` | `"latest"` | no |
+| prefix\_ecs | Prefix of IAM roles that will be passed for ECS update | `string` | `"ecs-"` | no |
+| prefix\_module | Prefix for naming AWS resources of this module | `string` | `"dkr-update"` | no |
+| retention | Lambda logs retention in days | `number` | `30` | no |
+| runtime | Lambda runtime version | `string` | `"python3.14"` | no |
+| tags | Tags that will be applied to the module's resources | `map(string)` | n/a | yes |
+| update\_ecs | Updates ECS Task Definition's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
+| update\_lambda | Updates Lambda's image automatically. Valid values are ('on', 'off') | `string` | `"off"` | no |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_event_rule"></a> [event\_rule](#output\_event\_rule) | EventBridge rule's ARN |
-| <a name="output_lambda_function"></a> [lambda\_function](#output\_lambda\_function) | Lambda function's ARN |
+| event\_rule | EventBridge rule's ARN |
+| lambda\_function | Lambda function's ARN |
 
 ## Resources
 

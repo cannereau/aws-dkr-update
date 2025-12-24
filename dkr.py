@@ -57,21 +57,21 @@ def handler(event, context):
             # browse ecs task definitions
             if UPDATE_ECS == "on":
                 tds = []
-                tag_image = f"{event['detail']['repository-name']}:{ENV_TAG}"
                 paginator = ECS.get_paginator("list_task_definitions")
                 iterator = paginator.paginate(status="ACTIVE")
                 for page in iterator:
                     logging.info("Browsing ecs task definitions...")
                     for arn in page["taskDefinitionArns"]:
-                        td = ECS.describe_task_definition(taskDefinition=arn)
-                        for cd in td["taskDefinition"]["containerDefinitions"]:
-                            logging.info(f"...IMAGE_URI:{cd['image']}")
-                            match = re.search(r"^[^/]*/([^:]*:[^:]*)$", cd["image"])
-                            if match is not None and match.group(1) == tag_image:
-                                logging.info(f"...TASK_ARN:{arn}")
-                                tds.append(arn)
+                        if process_task_definition(
+                            arn,
+                            event["detail"]["repository-name"],
+                            event["detail"]["image-digest"],
+                        ):
+                            tds.append(arn)
+
+                # rolling update ecs services
                 if len(tds) > 0:
-                    process_task_definitions(tds)
+                    update_services(tds)
 
         else:
             logging.info("Invalid Image Tag")
@@ -105,7 +105,59 @@ def process_function(arn, repo, digest):
             LDA.update_function_code(FunctionName=arn, ImageUri=target_uri)
 
 
-def process_task_definitions(arns):
+def process_task_definition(arn, repo, digest):
+    # retrieve container definitions
+    td = ECS.describe_task_definition(taskDefinition=arn)
+    cds = td["taskDefinition"]["containerDefinitions"]
+    changed = False
+    for i, cd in enumerate(td["taskDefinition"]["containerDefinitions"]):
+        logging.info(f"...IMAGE_URI:{cd['image']}")
+        match = re.search(r"^[^/]*/(.*)@(.*)$", cd["image"])
+
+        # check repo
+        logging.info(f"...IMA_REPO:{match.group(1)}")
+        if match.group(1) == repo:
+            # check digest
+            logging.info(f"...IMA_DIGEST:{match.group(2)}")
+            if match.group(2) == digest:
+                logging.info("...Image already up-to-date")
+
+            else:
+                # update container definition
+                target_uri = re.sub(r"@(.*)$", f"@{digest}", cd["image"])
+                logging.info(f"...Updating image to {target_uri}...")
+                cds[i]["image"] = target_uri
+                changed = True
+
+    # eventually register new task definition revision
+    if changed:
+        logging.info("...Registering new revision")
+        ECS.register_task_definition(
+            family=td["taskDefinition"]["family"],
+            taskRoleArn=td["taskDefinition"]["taskRoleArn"],
+            executionRoleArn=td["taskDefinition"]["executionRoleArn"],
+            networkMode=td["taskDefinition"]["networkMode"],
+            containerDefinitions=cds,
+            volumes=td["taskDefinition"]["volumes"],
+            placementConstraints=td["taskDefinition"]["placementConstraints"],
+            requiresCompatibilities=td["taskDefinition"]["requiresCompatibilities"],
+            cpu=td["taskDefinition"]["cpu"],
+            memory=td["taskDefinition"]["memory"],
+            tags=td["taskDefinition"]["tags"],
+            pidMode=td["taskDefinition"]["pidMode"],
+            ipcMode=td["taskDefinition"]["ipcMode"],
+            proxyConfiguration=td["taskDefinition"]["proxyConfiguration"],
+            inferenceAccelerators=td["taskDefinition"]["inferenceAccelerators"],
+            ephemeralStorage=td["taskDefinition"]["ephemeralStorage"],
+            runtimePlatform=td["taskDefinition"]["runtimePlatform"],
+            enableFaultInjection=td["taskDefinition"]["enableFaultInjection"],
+        )
+        return True
+    else:
+        return False
+
+
+def update_services(arns):
     # browse ecs clusters
     paginator = ECS.get_paginator("list_clusters")
     iterator = paginator.paginate()
@@ -129,7 +181,6 @@ def process_task_definitions(arns):
                         upd = ECS.update_service(
                             cluster=c,
                             service=srv["services"][0]["serviceName"],
-                            taskDefinition=srv["services"][0]["taskDefinition"],
                             forceNewDeployment=True,
                         )
                         if "deployments" in upd:
