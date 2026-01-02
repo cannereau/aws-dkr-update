@@ -67,7 +67,7 @@ def handler(event, context):
                     logging.info("Browsing ecs task definitions...")
                     for arn in page["taskDefinitionArns"]:
                         s = arn.split(":")
-                        logging.info(f"...FAMILY:{s[5]}")
+                        logging.info(f"FAMILY:{s[5][16:]}")
                         if s[5] != previous_family:
                             previous_family = s[5]
                             if process_task_definition(
