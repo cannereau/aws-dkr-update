@@ -42,9 +42,10 @@ resource "aws_lambda_function" "dkr" {
   }
   environment {
     variables = {
-      IMAGE_TAG     = var.image_tag
-      UPDATE_ECS    = var.update_ecs
-      UPDATE_LAMBDA = var.update_lambda
+      IMAGE_TAG       = var.image_tag
+      DISABLE_OLD_ECS = var.disable_old_ecs
+      UPDATE_ECS      = var.update_ecs
+      UPDATE_LAMBDA   = var.update_lambda
     }
   }
 }

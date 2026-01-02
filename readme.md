@@ -27,6 +27,7 @@ unprocessed *Event* and *Lambda* invocations
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | concurrents | Reserved concurrent Lambda executions | `number` | `4` | no |
+| disable\_old\_ecs | Deregister all previous ECS Task Definitions automatically. Valid values are ('on', 'off') | `string` | `"on"` | no |
 | event\_state | EventBridge rule's state. Valid values are ('ENABLED', 'DISABLED') | `string` | `"ENABLED"` | no |
 | image\_tag | Docker image's tag (e.g. latest, dev, qa, prd, ...) | `string` | `"latest"` | no |
 | prefix\_ecs | Prefix of IAM roles that will be passed for ECS update | `string` | `"ecs-"` | no |

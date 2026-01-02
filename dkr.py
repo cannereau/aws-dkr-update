@@ -10,6 +10,9 @@ logging.getLogger().setLevel(logging.INFO)
 ENV_TAG = "dev"
 if "IMAGE_TAG" in os.environ:
     ENV_TAG = os.environ["IMAGE_TAG"]
+DISABLE_OLD_ECS = "on"
+if "DISABLE_OLD_ECS" in os.environ:
+    DISABLE_OLD_ECS = os.environ["DISABLE_OLD_ECS"]
 UPDATE_ECS = "off"
 if "UPDATE_ECS" in os.environ:
     UPDATE_ECS = os.environ["UPDATE_ECS"]
@@ -57,17 +60,25 @@ def handler(event, context):
             # browse ecs task definitions
             if UPDATE_ECS == "on":
                 tds = []
+                previous_family = ""
                 paginator = ECS.get_paginator("list_task_definitions")
-                iterator = paginator.paginate(status="ACTIVE")
+                iterator = paginator.paginate(status="ACTIVE", sort="DESC")
                 for page in iterator:
                     logging.info("Browsing ecs task definitions...")
                     for arn in page["taskDefinitionArns"]:
-                        if process_task_definition(
-                            arn,
-                            event["detail"]["repository-name"],
-                            event["detail"]["image-digest"],
-                        ):
-                            tds.append(arn)
+                        s = arn.split(":")
+                        logging.info(f"...FAMILY:{s[5]}")
+                        if s[5] != previous_family:
+                            previous_family = s[5]
+                            if process_task_definition(
+                                arn,
+                                event["detail"]["repository-name"],
+                                event["detail"]["image-digest"],
+                            ):
+                                tds.append(arn)
+                        elif DISABLE_OLD_ECS == "on":
+                            logging.info(f"...DEREGISTERING:{s[6]}")
+                            ECS.deregister_task_definition(taskDefinition=arn)
 
                 # rolling update ecs services
                 if len(tds) > 0:
@@ -134,8 +145,9 @@ def process_task_definition(arn, repo, digest):
         logging.info("...Registering new revision")
         ntd = clean_task_definition(td["taskDefinition"], cds)
         ECS.register_task_definition(**ntd)
-        logging.info("...Deregestering old revision")
-        ECS.deregister_task_definition(taskDefinition=arn)
+        if DISABLE_OLD_ECS == "on":
+            logging.info("...Deregistering old revision")
+            ECS.deregister_task_definition(taskDefinition=arn)
         return True
     else:
         return False

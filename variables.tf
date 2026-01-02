@@ -4,6 +4,16 @@ variable "image_tag" {
   description = "Docker image's tag (e.g. latest, dev, qa, prd, ...)"
 }
 
+variable "disable_old_ecs" {
+  type        = string
+  default     = "on"
+  description = "Deregister all previous ECS Task Definitions automatically. Valid values are ('on', 'off')"
+  validation {
+    condition     = contains(["on", "off"], var.disable_old_ecs)
+    error_message = "Valid values for var: disable_old_ecs are ('on', 'off')"
+  }
+}
+
 variable "update_ecs" {
   type        = string
   default     = "off"
