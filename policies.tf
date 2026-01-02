@@ -56,6 +56,14 @@ data "aws_iam_policy_document" "running" {
     ]
   }
   statement {
+    sid    = "ECSDelete"
+    effect = "Allow"
+    actions = [
+      "ecs:DeregisterTaskDefinition"
+    ]
+    resources = ["*"]
+  }
+  statement {
     sid    = "ECSPassRole"
     effect = "Allow"
     actions = [
