@@ -59,7 +59,7 @@ def handler(event, context):
 
             # browse ecs task definitions
             if UPDATE_ECS == "on":
-                tds = []
+                families = []
                 previous_family = ""
                 paginator = ECS.get_paginator("list_task_definitions")
                 iterator = paginator.paginate(status="ACTIVE", sort="DESC")
@@ -67,22 +67,23 @@ def handler(event, context):
                     logging.info("Browsing ecs task definitions...")
                     for arn in page["taskDefinitionArns"]:
                         s = arn.split(":")
-                        logging.info(f"FAMILY:{s[5][16:]}")
-                        if s[5] != previous_family:
-                            previous_family = s[5]
+                        family = s[5][16:]
+                        logging.info(f"FAMILY:{family}")
+                        if family != previous_family:
+                            previous_family = family
                             if process_task_definition(
                                 arn,
                                 event["detail"]["repository-name"],
                                 event["detail"]["image-digest"],
                             ):
-                                tds.append(arn)
+                                families.append(family)
                         elif DISABLE_OLD_ECS == "on":
                             logging.info(f"...DEREGISTERING:{s[6]}")
                             ECS.deregister_task_definition(taskDefinition=arn)
 
                 # rolling update ecs services
-                if len(tds) > 0:
-                    update_services(tds)
+                if len(families) > 0:
+                    update_services(families)
 
         else:
             logging.info("Invalid Image Tag")
@@ -153,7 +154,7 @@ def process_task_definition(arn, repo, digest):
         return False
 
 
-def update_services(arns):
+def update_services(families):
     # browse ecs clusters
     paginator = ECS.get_paginator("list_clusters")
     iterator = paginator.paginate()
@@ -168,8 +169,10 @@ def update_services(arns):
                 for s in page_s["serviceArns"]:
                     # check task definition
                     srv = ECS.describe_services(cluster=c, services=[s])
-                    logging.info(f"...TASK_DEF:{srv['services'][0]['taskDefinition']}")
-                    if srv["services"][0]["taskDefinition"] in arns:
+                    s = srv["services"][0]["taskDefinition"].split(":")
+                    family = s[5][16:]
+                    logging.info(f"FAMILY:{family}")
+                    if family in families:
                         # rolling update
                         logging.info(
                             f"...Updating service {srv['services'][0]['serviceName']}"
@@ -177,6 +180,7 @@ def update_services(arns):
                         upd = ECS.update_service(
                             cluster=c,
                             service=srv["services"][0]["serviceName"],
+                            taskDefinition=family,
                             forceNewDeployment=True,
                         )
                         if "deployments" in upd:
