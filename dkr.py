@@ -183,8 +183,8 @@ def update_services(families):
                             taskDefinition=family,
                             forceNewDeployment=True,
                         )
-                        if "deployments" in upd:
-                            for dep in upd["deployments"]:
+                        if "service" in upd and "deployments" in upd["service"]:
+                            for dep in upd["service"]["deployments"]:
                                 if (
                                     "rolloutState" in dep
                                     and dep["rolloutState"] == "IN_PROGRESS"
