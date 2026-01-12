@@ -86,10 +86,10 @@ def handler(event, context):
                     update_services(families)
 
         else:
-            logging.info("Invalid Image Tag")
+            logging.warning("Invalid Image Tag!")
 
     else:
-        logging.info("Invalid Event")
+        logging.warning("Invalid Event!")
 
     # the end
     logging.info("This is the end")

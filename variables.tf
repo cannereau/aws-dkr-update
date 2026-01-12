@@ -77,4 +77,8 @@ variable "runtime" {
 variable "tags" {
   type        = map(string)
   description = "Tags that will be applied to the module's resources"
+
+  default = {
+    DeploymentTool = "OpenTofu"
+  }
 }

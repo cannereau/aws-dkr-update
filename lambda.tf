@@ -1,14 +1,14 @@
 # lambda handler code zip file
 data "archive_file" "lambda_handler" {
   type        = "zip"
-  source_file = "${path.module}/dkr.py"
-  output_path = "${path.module}/dkr.zip"
+  source_file = "${path.module}/lambda.py"
+  output_path = "${path.module}/lambda.zip"
 }
 
 # define iam lambda role
 resource "aws_iam_role" "dkr" {
-  name               = format("%s-lbda-%s", var.prefix_module, random_string.suffix.result)
-  description        = "Allow ECS & Lambda images"
+  name               = format("%s-%s", var.prefix_module, random_string.suffix.result)
+  description        = "Allow ECS & Lambda Docker image updates"
   assume_role_policy = data.aws_iam_policy_document.lambda.json
   tags               = var.tags
 }
@@ -29,8 +29,8 @@ resource "aws_lambda_function" "dkr" {
   filename                       = data.archive_file.lambda_handler.output_path
   source_code_hash               = data.archive_file.lambda_handler.output_base64sha256
   role                           = aws_iam_role.dkr.arn
-  handler                        = "dkr.handler"
-  description                    = "Updates Lambda functions images from ECR tags"
+  handler                        = "lambda.handler"
+  description                    = "Updates ECS & Lambda Docker images from ECR tags"
   timeout                        = "300"
   memory_size                    = "128"
   runtime                        = var.runtime

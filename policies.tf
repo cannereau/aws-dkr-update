@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "lambda" {
 
 # policy for lambda running privileges
 data "aws_iam_policy_document" "running" {
-  #checkov:skip=CKV_AWS_356: Ensure no IAM policies documents allow "*" as a statement's resource for restrictable actions
+  #checkov:skip=CKV_AWS_356:Needed for describing all ECS Services and Task Definitions
   statement {
     sid    = "LambdaRead"
     effect = "Allow"

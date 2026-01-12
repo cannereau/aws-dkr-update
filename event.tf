@@ -24,7 +24,7 @@ resource "aws_sqs_queue_policy" "dlq" {
 # event rule
 resource "aws_cloudwatch_event_rule" "dkr" {
   name        = format("%s-%s", var.prefix_module, random_string.suffix.result)
-  description = "Catch ECR image update"
+  description = "Catch ECR Image Upload"
   state       = var.event_state
   tags        = var.tags
   event_pattern = jsonencode({
